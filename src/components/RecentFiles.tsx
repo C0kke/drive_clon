@@ -27,7 +27,6 @@ export function formatBytes(bytes: number, decimals = 1) {
 }
 
 export default function RecentFiles({ files }: RecentFilesProps) {
-  // Filter out folders, only display files
   const recent = files.filter((file) => !file.isFolder).slice(0, 3);
 
   const getFileIcon = (mimeType: string) => {
@@ -73,7 +72,6 @@ export default function RecentFiles({ files }: RecentFilesProps) {
           <div key={file.id} className={styles.card}>
             <div className={styles.previewContainer}>
               {isImage(file.mimeType) ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={`/api/download/${file.id}`}
                   alt={file.originalName}

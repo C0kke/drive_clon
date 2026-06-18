@@ -13,12 +13,10 @@ export async function GET() {
     const data = await response.Body?.transformToString();
     const files = JSON.parse(data || "[]");
 
-    // Sort files by uploadDate descending (newest first)
     files.sort((a: any, b: any) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
 
     return NextResponse.json(files);
   } catch (error: any) {
-    // If the metadata file doesn't exist yet, it means no files have been uploaded. Return empty array.
     if (error.name === "NoSuchKey") {
       return NextResponse.json([]);
     }

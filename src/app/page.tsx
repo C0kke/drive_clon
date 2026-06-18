@@ -22,13 +22,11 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Layout and navigation states
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<"inicio" | "files">("files");
   const [currentPath, setCurrentPath] = useState("/");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal & Dropdown states
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -59,7 +57,6 @@ export default function HomePage() {
     fetchFiles();
   }, [fetchFiles]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -106,7 +103,6 @@ export default function HomePage() {
 
   const triggerFileUpload = () => {
     setIsDropdownOpen(false);
-    // Ensure we switch to tab with dropzone or trigger directly
     dropzoneRef.current?.openFileDialog();
   };
 
@@ -117,7 +113,6 @@ export default function HomePage() {
 
   return (
     <div className={styles.appContainer}>
-      {/* 1. Header Navigation Bar */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <button className={styles.menuBtn} onClick={toggleSidebar} title="Menú lateral">
@@ -154,16 +149,12 @@ export default function HomePage() {
         </div>
 
         <div className={styles.headerRight}>
-          {/* Decorative avatar */}
           <div className={styles.avatar}>DC</div>
         </div>
       </header>
 
-      {/* Main Layout Area */}
       <div className={styles.mainLayout}>
-        {/* 2. Left Collapsible Sidebar */}
         <aside className={`${styles.sidebar} ${isSidebarOpen ? "" : styles.sidebarCollapsed}`}>
-          {/* "Nuevo" Button with Dropdown Options */}
           <div className={styles.newButtonWrapper} ref={dropdownRef}>
             <button className={styles.newButton} onClick={() => setIsDropdownOpen((prev) => !prev)}>
               <Plus className={styles.newButtonIcon} />
@@ -183,13 +174,12 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Navigation Links */}
           <nav className={styles.sidebarNav}>
             <button
               className={`${styles.navItem} ${activeTab === "inicio" ? styles.navItemActive : ""}`}
               onClick={() => {
                 setActiveTab("inicio");
-                setSearchQuery(""); // Clear search when switching tabs
+                setSearchQuery("");
               }}
             >
               <HomeIcon className={styles.navItemIcon} />
@@ -205,7 +195,6 @@ export default function HomePage() {
           </nav>
         </aside>
 
-        {/* 3. Main Content Wrapper */}
         <main className={styles.contentArea}>
           <div className={styles.contentCard}>
             {loading && files.length === 0 ? (
@@ -224,7 +213,6 @@ export default function HomePage() {
             ) : (
               <div className={styles.tabContent}>
                 {activeTab === "inicio" ? (
-                  // "Inicio" Tab View
                   <div className={styles.tabView}>
                     <RecentFiles files={files} />
                     <div className={styles.uploadCardContainer}>
@@ -237,7 +225,6 @@ export default function HomePage() {
                     </div>
                   </div>
                 ) : (
-                  // "Todos los archivos" Tab View
                   <div className={styles.tabView}>
                     <FileList
                       files={files}
@@ -246,7 +233,6 @@ export default function HomePage() {
                       searchQuery={searchQuery}
                       onSearchQueryChange={setSearchQuery}
                     />
-                    {/* Render dropzone at the bottom for folder uploads */}
                     <div className={styles.folderUploadContainer}>
                       <Dropzone
                         ref={dropzoneRef}
@@ -262,7 +248,6 @@ export default function HomePage() {
         </main>
       </div>
 
-      {/* 4. Overlay Modal: New Folder Creation */}
       {isCreateFolderModalOpen && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>

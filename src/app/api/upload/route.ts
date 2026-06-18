@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
       const buffer = Buffer.from(bytes);
       const s3Key = `files/${id}`;
 
-      // 1. Upload the file to S3
       const uploadCommand = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: s3Key,
@@ -57,7 +56,6 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // 2. Read the existing metadata.json from S3
     let existingFiles = [];
     try {
       const getMetaCommand = new GetObjectCommand({
@@ -68,16 +66,13 @@ export async function POST(request: NextRequest) {
       const metaData = await metaResponse.Body?.transformToString();
       existingFiles = JSON.parse(metaData || "[]");
     } catch (metaError: any) {
-      // If metadata.json doesn't exist, we start with an empty array
       if (metaError.name !== "NoSuchKey") {
         throw metaError;
       }
     }
 
-    // 3. Append new file/folder metadata
     existingFiles.push(newFileMetadata);
 
-    // 4. Write the updated metadata back to S3
     const putMetaCommand = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: "metadata.json",

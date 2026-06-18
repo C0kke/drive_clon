@@ -32,7 +32,6 @@ const Dropzone = forwardRef<DropzoneRef, DropzoneProps>(({ onUploadComplete, cur
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Expose file selection click to parent
   useImperativeHandle(ref, () => ({
     openFileDialog() {
       if (uploadState.status !== "uploading") {
@@ -112,22 +111,18 @@ const Dropzone = forwardRef<DropzoneRef, DropzoneProps>(({ onUploadComplete, cur
           currentIndex: i + 1,
           errorMsg: err.message || "Error al subir el archivo",
         });
-        // Stop sequential uploading on error
         return;
       }
     }
 
-    // Success state
     setUploadState((prev) => ({
       ...prev,
       status: "success",
       progress: 100,
     }));
 
-    // Trigger update in parent
     onUploadComplete();
 
-    // Reset back to idle after 2.5 seconds
     setTimeout(() => {
       setUploadState({
         status: "idle",
@@ -143,12 +138,11 @@ const Dropzone = forwardRef<DropzoneRef, DropzoneProps>(({ onUploadComplete, cur
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("path", currentPath); // Attach current directory path!
+      formData.append("path", currentPath);
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/api/upload", true);
 
-      // Track progress
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
           const percentComplete = Math.round((e.loaded / e.total) * 100);

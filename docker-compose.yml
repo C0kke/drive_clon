@@ -3,11 +3,11 @@ version: '3.8'
 services:
   localstack:
     container_name: drive_clon_localstack
-    image: localstack/localstack:latest
+    image: localstack/localstack:4.4.0
     ports:
-      - "4566:4566"            # LocalStack Edge Port
+      - "4566:4566"
     environment:
-      - SERVICES=s3            # Only enable S3
+      - SERVICES=s3
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
       - "localstack_data:/var/lib/localstack"

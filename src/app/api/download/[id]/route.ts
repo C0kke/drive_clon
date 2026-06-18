@@ -33,7 +33,6 @@ export async function GET(
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // 2. Fetch the file stream from S3
     const getFileCommand = new GetObjectCommand({
       Bucket: BUCKET_NAME,
       Key: `files/${id}`,
@@ -45,13 +44,10 @@ export async function GET(
       return NextResponse.json({ error: "File content is empty" }, { status: 404 });
     }
 
-    // Convert the S3 Node stream to a Web ReadableStream which NextResponse accepts
     const webStream = fileResponse.Body.transformToWebStream();
 
-    // 3. Return the stream with content disposition header for downloading
     const headers = new Headers();
     headers.set("Content-Type", fileMeta.mimeType || "application/octet-stream");
-    // Standard and modern way to handle file names with spaces and special characters
     headers.set(
       "Content-Disposition",
       `attachment; filename*=UTF-8''${encodeURIComponent(fileMeta.originalName)}`

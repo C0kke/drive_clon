@@ -1,111 +1,92 @@
 # Drive Clon - Almacenamiento S3 con Next.js, LocalStack y Terraform
 
-Este proyecto es una aplicación web full-stack minimalista y moderna que permite arrastrar y soltar (Drag and Drop) cualquier tipo de archivo (documentos, imágenes, videos) y almacenarlo de manera local o en la nube utilizando el protocolo S3. 
-
-## Tecnologías Utilizadas
-
-- **Frontend & Backend**: Next.js 15+ (App Router, TypeScript y CSS Modules para estilos premium sin dependencias externas).
-- **Almacenamiento**: AWS S3 (mockeado localmente con **LocalStack** para desarrollo).
-- **Aprovisionamiento**: **Terraform** (para crear y gestionar el bucket S3).
-- **Contenedores**: **Docker & Docker Compose** (para empaquetar la aplicación y LocalStack).
-- **Gestor de Paquetes**: **pnpm** (por eficiencia, rapidez y seguridad).
+Este proyecto es un clon de Google Drive que posee Drag & Drop para subir archivos (documentos, imágenes, videos) y organizarlos en carpetas guardadas localmente en un Bucket de AWS S3 mediante LocalStack.
 
 ---
 
-## Flujo de Ejecución
+## Herramientas y Tecnologías
 
-1. El usuario abre la web en su navegador.
-2. Arrastra y suelta uno o más archivos (o hace clic para seleccionarlos manualmente).
-3. Se muestra una barra de progreso real en tiempo real por cada archivo subido.
-4. Una vez completado, la UI se actualiza automáticamente mostrando el último archivo subido en la sección de **Recientes** (con previsualizaciones para imágenes).
-5. Se habilita un historial con buscador de todos los archivos cargados, permitiendo descargarlos en el orden y momento que se prefiera.
-
----
-
-## Estructura de Configuración de Credenciales
-
-El proyecto está diseñado para funcionar en desarrollo de manera autónoma con **LocalStack** sin necesidad de credenciales de AWS reales. Las variables de configuración principales se encuentran centralizadas:
-
-1. **Docker Compose (`docker-compose.yml`)**:
-   Define las credenciales simuladas (`test` / `test`) y el endpoint del SDK apuntando al contenedor de LocalStack.
-2. **Terraform (`terraform/variables.tf`)**:
-   Contiene los valores por defecto del endpoint de LocalStack (`http://localhost:4566`) y del bucket (`drive-clon-bucket`). Para usar AWS real, basta con cambiar `is_localstack` a `false` y proporcionar tus claves.
-3. **SDK Cliente S3 (`src/lib/s3.ts`)**:
-   Configura el cliente de AWS automáticamente. Si detecta la variable `AWS_ENDPOINT`, activa el modo `forcePathStyle` necesario para LocalStack.
+- **Frontend & Backend**: Next.js 15+ (App Router, TypeScript y CSS Modules).
+- **Infraestructura Local**: AWS S3 simulado localmente con LocalStack.
+- **Terraform**: para crear y gestionar el bucket S3.
+- **Docker & Docker Compose**: para ejecutar LocalStack de forma aislada.
+- **pnpm**: para la instalación eficiente de dependencias.
 
 ---
 
-## Requisitos Previos
+## Variables de Entorno
 
-Asegúrate de tener instalado en tu sistema:
-- [Docker](https://www.docker.com/) y Docker Compose
-- [Terraform](https://www.terraform.io/)
-- [pnpm](https://pnpm.io/) y Node.js (opcional, si deseas correr la app en local)
+```env
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+AWS_ENDPOINT=http://localhost:4566
+AWS_S3_BUCKET=drive-clon-bucket
+```
 
 ---
 
-## Guía de Inicio Rápido (Desarrollo Local)
+## Guía de Inicio
 
-### Paso 1: Levantar LocalStack (S3 local)
-
-En el directorio raíz del proyecto, ejecuta el siguiente comando para iniciar el servicio de S3 en segundo plano:
+Paso 1: Levantar LocalStack con docker:
 
 ```bash
 docker compose up -d localstack
 ```
 
-### Paso 2: Aprovisionar el Bucket con Terraform
-
-Una vez que LocalStack esté corriendo, utiliza Terraform para crear el bucket `drive-clon-bucket`:
+Paso 2: Ejecutar el Bucket con Terraform:
 
 ```bash
 # Entrar a la carpeta de Terraform
 cd terraform
 
-# Inicializar Terraform
+# Inicializar los plugins (AWS Provider)
 terraform init
 
-# Aplicar la configuración
+# Crear los recursos (el bucket y su bloqueo de acceso público)
 terraform apply -auto-approve
-
-# Volver a la raíz
-cd ..
 ```
 
-### Paso 3: Instalar dependencias e iniciar Next.js
+Una vez que LocalStack esté arriba (puedes verificarlo en [http://localhost:4566/_localstack/health](http://localhost:4566/_localstack/health)):
 
-Si prefieres correr la aplicación Next.js directamente en tu máquina host:
+---
+
+Paso 3: Instalar dependencias e iniciar Next.js:
 
 ```bash
-# Instalar dependencias
+# Instalar dependencias de Next.js
 pnpm install
 
-# Iniciar servidor de desarrollo
-pnpm dev
+# Iniciar servidor local
+pnpm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+Abre **[http://localhost:3000](http://localhost:3000)** en tu navegador para interactuar con la aplicación.
 
 ---
 
-## Ejecución Total en Contenedores (Docker Completo)
+## Estructura del Proyecto
 
-Si prefieres correr tanto la infraestructura como la aplicación dentro de Docker (sin necesidad de tener Node o pnpm instalado en tu máquina):
-
-1. Sigue el **Paso 1** y **Paso 2** para iniciar S3 y aprovisionar el bucket.
-2. Levanta el contenedor de la aplicación:
-   ```bash
-   docker compose up -d app
-   ```
-3. La aplicación estará accesible en [http://localhost:3000](http://localhost:3000).
-
----
-
-## Estándar de Commits (Conventional Commits)
-
-El control de versiones de este proyecto se gestiona bajo el estándar de **Conventional Commits**. Ejemplos de uso en este repositorio:
-
-- `feat: ...` -> Para nuevas características (ej. `feat: add drag and drop zone component`)
-- `fix: ...` -> Para corregir errores (ej. `fix: resolve download name encoding issues`)
-- `chore: ...` -> Tareas de mantenimiento o herramientas (ej. `chore: configure terraform variables`)
-- `docs: ...` -> Cambios en documentación (ej. `docs: update setup instructions in README`)
+```text
+├── terraform/               # Archivos de aprovisionamiento de infraestructura (IaC)
+│   ├── main.tf              # Definición de recursos S3
+│   ├── providers.tf         # Configuración del proveedor de AWS
+│   ├── variables.tf         # Variables por defecto para local y AWS
+│   └── outputs.tf           # Datos de salida (Bucket Name, ARN)
+├── src/
+│   ├── app/                 # Rutas de Next.js (App Router)
+│   │   ├── api/             # API Endpoints
+│   │   │   ├── files/       # Obtener lista de metadatos de archivos y carpetas
+│   │   │   ├── upload/      # Subida física de archivos a S3 y creación de carpetas
+│   │   │   └── download/    # Descarga directa de archivos de S3 mediante stream
+│   │   ├── globals.css      # Variables de color del diseño Google Drive
+│   │   └── page.tsx         # Página principal y control de estados
+│   ├── components/          # Componentes reutilizables
+│   │   ├── Dropzone.tsx     # Zona de arrastrar y soltar archivos
+│   │   ├── FileList.tsx     # Navegación, buscador y listado de archivos/carpetas
+│   │   └── RecentFiles.tsx  # Grid de sugerencias de los 3 últimos archivos
+│   └── lib/
+│       └── s3.ts            # Inicialización del AWS SDK S3Client
+├── docker-compose.yml       # Orquestador del contenedor de LocalStack
+└── Dockerfile               # Empaquetado de la aplicación Next.js para producción
+```

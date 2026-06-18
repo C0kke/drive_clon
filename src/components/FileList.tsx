@@ -71,7 +71,6 @@ export default function FileList({
 
   const isSearching = searchQuery.trim() !== "";
 
-  // Filter items
   const displayItems = files.filter((file) => {
     if (isSearching) {
       return file.originalName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -80,11 +79,9 @@ export default function FileList({
     }
   });
 
-  // Sort: folders first, then files
   const displayFolders = displayItems.filter((f) => f.isFolder);
   const displayFiles = displayItems.filter((f) => !f.isFolder);
 
-  // Click on a breadcrumb item
   const handleBreadcrumbClick = (index: number) => {
     if (index === -1) {
       onPathChange("/");
@@ -96,7 +93,6 @@ export default function FileList({
     onPathChange(targetPath);
   };
 
-  // Get Breadcrumbs array
   const breadcrumbs = currentPath.split("/").filter(Boolean);
 
   const handleFolderClick = (folder: S3File) => {
@@ -122,7 +118,6 @@ export default function FileList({
 
   return (
     <div className={styles.container}>
-      {/* Folder Breadcrumbs and Search Results Header */}
       <div className={styles.navigationHeader}>
         {isSearching ? (
           <div className={styles.breadcrumbs}>
@@ -151,7 +146,6 @@ export default function FileList({
         )}
       </div>
 
-      {/* Folders Section */}
       {displayFolders.length > 0 && (
         <div className={styles.section}>
           <h3 className={styles.sectionTitle}>Carpetas</h3>
@@ -171,14 +165,12 @@ export default function FileList({
         </div>
       )}
 
-      {/* Files Section */}
       <div className={styles.section}>
         {!isSearching && displayFolders.length > 0 && displayFiles.length > 0 && (
           <h3 className={styles.sectionTitle}>Archivos</h3>
         )}
 
         {displayFiles.length === 0 ? (
-          // Empty folder or search state
           displayFolders.length === 0 && (
             <div className={styles.emptyFolderState}>
               <Folder className={styles.emptyStateIcon} />
