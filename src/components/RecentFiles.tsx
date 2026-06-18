@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Download, FileText, Video, Image as ImageIcon, FileArchive, FileCode, File } from "lucide-react";
+import { Download, Trash2, FileText, Video, Image as ImageIcon, FileArchive, FileCode, File } from "lucide-react";
 import styles from "./RecentFiles.module.css";
 
 interface S3File {
@@ -15,6 +15,7 @@ interface S3File {
 
 interface RecentFilesProps {
   files: S3File[];
+  onDeleteComplete?: () => void;
 }
 
 export function formatBytes(bytes: number, decimals = 1) {
@@ -26,7 +27,7 @@ export function formatBytes(bytes: number, decimals = 1) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
-export default function RecentFiles({ files }: RecentFilesProps) {
+export default function RecentFiles({ files, onDeleteComplete }: RecentFilesProps) {
   const recent = files.filter((file) => !file.isFolder).slice(0, 3);
 
   const getFileIcon = (mimeType: string) => {
@@ -55,6 +56,29 @@ export default function RecentFiles({ files }: RecentFilesProps) {
 
   const isImage = (mimeType: string) => mimeType.startsWith("image/");
   const isVideo = (mimeType: string) => mimeType.startsWith("video/");
+
+  const handleDelete = async (e: React.MouseEvent, file: S3File) => {
+    e.preventDefault();
+    const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar el archivo "${file.originalName}"?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/files/${file.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const resData = await response.json();
+        throw new Error(resData.error || "Error al eliminar");
+      }
+
+      if (onDeleteComplete) {
+        onDeleteComplete();
+      }
+    } catch (err: any) {
+      alert(err.message || "Error al eliminar el archivo");
+    }
+  };
 
   if (recent.length === 0) {
     return (
@@ -101,14 +125,23 @@ export default function RecentFiles({ files }: RecentFilesProps) {
                 <span className={styles.fileSize}>{formatBytes(file.size)}</span>
               </div>
               
-              <a
-                href={`/api/download/${file.id}`}
-                download={file.originalName}
-                className={styles.downloadBtn}
-                title="Descargar archivo"
-              >
-                <Download className={styles.downloadIcon} />
-              </a>
+              <div className={styles.actionButtons}>
+                <a
+                  href={`/api/download/${file.id}`}
+                  download={file.originalName}
+                  className={styles.downloadBtn}
+                  title="Descargar archivo"
+                >
+                  <Download className={styles.downloadIcon} />
+                </a>
+                <button
+                  onClick={(e) => handleDelete(e, file)}
+                  className={styles.deleteBtn}
+                  title="Eliminar archivo"
+                >
+                  <Trash2 className={styles.deleteIcon} />
+                </button>
+              </div>
             </div>
           </div>
         ))}

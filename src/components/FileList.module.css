@@ -290,28 +290,93 @@
   stroke-width: 1.5;
 }
 
+.actionButtons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.deleteBtn {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f3f4;
+  border: 1px solid var(--card-border);
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.deleteBtn:hover {
+  background: #fde8e8;
+  color: #e53e3e;
+  border-color: #f8b4b4;
+  transform: scale(1.05);
+}
+
+.deleteIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.deleteFolderBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.folderCard:hover .deleteFolderBtn {
+  opacity: 1;
+}
+
+.deleteFolderBtn:hover {
+  background: #fde8e8;
+  color: #e53e3e;
+}
+
 /* Responsive Table rules */
 @media (max-width: 768px) {
   .pathCell {
-    display: none; /* Hide location path in search on small screens */
+    display: none;
+    /* Hide location path in search on small screens */
   }
 }
 
 @media (max-width: 640px) {
+
   .table th:nth-child(2),
   .table td:nth-child(2) {
-    display: none; /* Hide date/path depending on search on mobile */
+    display: none;
+    /* Hide date/path depending on search on mobile */
   }
 }
 
 @media (max-width: 480px) {
+
   .table th:nth-child(3),
   .table td:nth-child(3) {
-    display: none; /* Hide size */
+    display: none;
+    /* Hide size */
   }
+
   .nameCell {
     max-width: 160px;
   }
+
   .folderGrid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }

@@ -133,7 +133,6 @@ export default function HomePage() {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                // If user is on Inicio, switch to files view to see searched contents
                 if (e.target.value.trim() !== "" && activeTab !== "files") {
                   setActiveTab("files");
                 }
@@ -214,7 +213,7 @@ export default function HomePage() {
               <div className={styles.tabContent}>
                 {activeTab === "inicio" ? (
                   <div className={styles.tabView}>
-                    <RecentFiles files={files} />
+                    <RecentFiles files={files} onDeleteComplete={fetchFiles} />
                     <div className={styles.uploadCardContainer}>
                       <h3 className={styles.uploadCardTitle}>Subir archivos</h3>
                       <Dropzone
@@ -232,6 +231,7 @@ export default function HomePage() {
                       onPathChange={setCurrentPath}
                       searchQuery={searchQuery}
                       onSearchQueryChange={setSearchQuery}
+                      onDeleteComplete={fetchFiles}
                     />
                     <div className={styles.folderUploadContainer}>
                       <Dropzone

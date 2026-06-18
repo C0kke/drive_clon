@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Folder, ChevronRight, Download, FileText, Video, Image as ImageIcon, FileArchive, FileCode, File, Calendar, ExternalLink } from "lucide-react";
+import { Folder, ChevronRight, Download, Trash2, FileText, Video, Image as ImageIcon, FileArchive, FileCode, File, Calendar, ExternalLink } from "lucide-react";
 import { formatBytes } from "./RecentFiles";
 import styles from "./FileList.module.css";
 
@@ -21,6 +21,7 @@ interface FileListProps {
   onPathChange: (path: string) => void;
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  onDeleteComplete?: () => void;
 }
 
 export default function FileList({
@@ -28,6 +29,7 @@ export default function FileList({
   currentPath,
   onPathChange,
   searchQuery,
+  onDeleteComplete,
 }: FileListProps) {
 
   const getFileIcon = (mimeType: string) => {
@@ -101,6 +103,30 @@ export default function FileList({
     onPathChange(newPath);
   };
 
+  const handleDelete = async (e: React.MouseEvent, item: S3File) => {
+    e.stopPropagation();
+    const typeLabel = item.isFolder ? "la carpeta y todo su contenido" : "el archivo";
+    const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar ${typeLabel} "${item.originalName}"?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/files/${item.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const resData = await response.json();
+        throw new Error(resData.error || "Error al eliminar");
+      }
+
+      if (onDeleteComplete) {
+        onDeleteComplete();
+      }
+    } catch (err: any) {
+      alert(err.message || "Error al eliminar el elemento");
+    }
+  };
+
   const getFolderNameDisplay = (pathStr: string) => {
     if (pathStr === "/") return "Mi unidad";
     const segments = pathStr.split("/").filter(Boolean);
@@ -159,6 +185,13 @@ export default function FileList({
               >
                 <Folder className={styles.folderCardIcon} />
                 <span className={styles.folderCardName}>{folder.originalName}</span>
+                <button
+                  className={styles.deleteFolderBtn}
+                  onClick={(e) => handleDelete(e, folder)}
+                  title="Eliminar carpeta"
+                >
+                  <Trash2 className={styles.deleteIcon} />
+                </button>
               </div>
             ))}
           </div>
@@ -224,14 +257,23 @@ export default function FileList({
                     </td>
                     <td>{formatBytes(file.size)}</td>
                     <td className={styles.actionCell}>
-                      <a
-                        href={`/api/download/${file.id}`}
-                        download={file.originalName}
-                        className={styles.downloadBtn}
-                        title="Descargar archivo"
-                      >
-                        <Download className={styles.downloadIcon} />
-                      </a>
+                      <div className={styles.actionButtons}>
+                        <a
+                          href={`/api/download/${file.id}`}
+                          download={file.originalName}
+                          className={styles.downloadBtn}
+                          title="Descargar archivo"
+                        >
+                          <Download className={styles.downloadIcon} />
+                        </a>
+                        <button
+                          onClick={(e) => handleDelete(e, file)}
+                          className={styles.deleteBtn}
+                          title="Eliminar archivo"
+                        >
+                          <Trash2 className={styles.deleteIcon} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
