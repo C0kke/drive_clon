@@ -145,6 +145,38 @@
   height: 14px;
 }
 
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.deleteBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f3f4;
+  border: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.deleteBtn:hover {
+  background: #fde8e8;
+  color: #e53e3e;
+  border-color: #f8b4b4;
+  transform: scale(1.05);
+}
+
+.deleteIcon {
+  width: 14px;
+  height: 14px;
+}
+
 .emptyContainer {
   padding: 2.5rem;
   text-align: center;
