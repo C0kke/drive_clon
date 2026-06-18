@@ -10,6 +10,7 @@ interface S3File {
   mimeType: string;
   size: number;
   uploadDate: string;
+  isFolder?: boolean;
 }
 
 interface RecentFilesProps {
@@ -26,7 +27,8 @@ export function formatBytes(bytes: number, decimals = 1) {
 }
 
 export default function RecentFiles({ files }: RecentFilesProps) {
-  const recent = files.slice(0, 3);
+  // Filter out folders, only display files
+  const recent = files.filter((file) => !file.isFolder).slice(0, 3);
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) return <ImageIcon className={styles.fileIcon} />;
@@ -56,7 +58,11 @@ export default function RecentFiles({ files }: RecentFilesProps) {
   const isVideo = (mimeType: string) => mimeType.startsWith("video/");
 
   if (recent.length === 0) {
-    return null;
+    return (
+      <div className={styles.emptyContainer}>
+        <p className={styles.emptyText}>No hay archivos subidos recientemente.</p>
+      </div>
+    );
   }
 
   return (

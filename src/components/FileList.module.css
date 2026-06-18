@@ -2,77 +2,115 @@
   width: 100%;
 }
 
-.header {
+.navigationHeader {
+  margin-bottom: 1.5rem;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  align-items: center;
 }
 
-@media (min-width: 640px) {
-  .header {
-    flex-direction: row;
-    align-items: center;
-  }
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 500;
 }
 
-.title {
-  font-size: 1.25rem;
-  font-weight: 600;
+.breadcrumbItem {
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.breadcrumbItem:hover {
+  background-color: var(--card-hover-bg);
+  color: var(--primary);
+}
+
+.breadcrumbItemActive {
   color: var(--text-primary);
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
 }
 
-.searchWrapper {
-  position: relative;
-  width: 100%;
-}
-
-@media (min-width: 640px) {
-  .searchWrapper {
-    width: 280px;
-  }
-}
-
-.searchIcon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.breadcrumbSeparator {
   width: 16px;
   height: 16px;
   color: var(--text-muted);
-  pointer-events: none;
 }
 
-.searchInput {
-  width: 100%;
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+
+/* Folder Grid Styles */
+.folderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.folderCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 8px;
-  padding: 0.55rem 0.75rem 0.55rem 2.25rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  user-select: none;
+}
+
+.folderCard:hover {
+  background-color: var(--card-hover-bg);
+  border-color: #c2e7ff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.folderCardIcon {
+  width: 20px;
+  height: 20px;
+  color: #5f6368;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
+}
+
+.folderCard:hover .folderCardIcon {
+  color: var(--primary);
+}
+
+.folderCardName {
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-primary);
-  font-size: 0.9rem;
-  font-family: inherit;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.searchInput:focus {
-  outline: none;
-  border-color: var(--primary-hover);
-  box-shadow: 0 0 0 3px var(--primary-glow);
-}
-
+/* Table Styles */
 .tableWrapper {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 12px;
   overflow: hidden;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .table {
@@ -83,18 +121,18 @@
 }
 
 .table th {
-  background: rgba(255, 255, 255, 0.02);
+  background: #f8f9fa;
   padding: 0.85rem 1.25rem;
   font-weight: 600;
   color: var(--text-secondary);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--card-border);
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
 }
 
 .row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid #f1f3f4;
   transition: background-color var(--transition-fast);
 }
 
@@ -103,7 +141,7 @@
 }
 
 .row:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: #f8f9fa;
 }
 
 .table td {
@@ -123,9 +161,9 @@
 }
 
 .fileIcon {
-  width: 20px;
-  height: 20px;
-  color: var(--primary-hover);
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
   flex-shrink: 0;
 }
 
@@ -152,6 +190,32 @@
   color: var(--text-muted);
 }
 
+.pathCell {
+  max-width: 180px;
+}
+
+.pathLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--primary);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: background-color var(--transition-fast);
+}
+
+.pathLink:hover {
+  background-color: var(--primary-glow);
+  text-decoration: underline;
+}
+
+.pathLinkIcon {
+  width: 12px;
+  height: 12px;
+}
+
 .actionCol {
   text-align: right;
   width: 100px;
@@ -165,9 +229,9 @@
   display: inline-flex;
   width: 32px;
   height: 32px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  background: #f1f3f4;
+  border: 1px solid var(--card-border);
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
@@ -178,8 +242,8 @@
 .downloadBtn:hover {
   background: var(--primary);
   color: #fff;
+  border-color: var(--primary);
   transform: scale(1.05);
-  box-shadow: 0 0 10px var(--primary-glow);
 }
 
 .downloadIcon {
@@ -187,27 +251,68 @@
   height: 14px;
 }
 
-.emptyContainer,
-.noResults {
-  padding: 3rem 2rem;
+/* Empty states */
+.emptyContainer {
+  padding: 4rem 2rem;
   text-align: center;
   color: var(--text-secondary);
+  border: 1px dashed var(--card-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.emptyFolderState {
+  padding: 3.5rem 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.emptyStateIcon {
+  width: 40px;
+  height: 40px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  stroke-width: 1.5;
 }
 
 /* Responsive Table rules */
+@media (max-width: 768px) {
+  .pathCell {
+    display: none; /* Hide location path in search on small screens */
+  }
+}
+
 @media (max-width: 640px) {
   .table th:nth-child(2),
   .table td:nth-child(2) {
-    display: none; /* Hide date on mobile screens */
+    display: none; /* Hide date/path depending on search on mobile */
   }
 }
 
 @media (max-width: 480px) {
   .table th:nth-child(3),
   .table td:nth-child(3) {
-    display: none; /* Hide size on ultra narrow screens */
+    display: none; /* Hide size */
   }
   .nameCell {
-    max-width: 180px;
+    max-width: 160px;
+  }
+  .folderGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }

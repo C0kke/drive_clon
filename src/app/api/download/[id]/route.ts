@@ -13,7 +13,6 @@ export async function GET(
       return NextResponse.json({ error: "Missing file ID" }, { status: 400 });
     }
 
-    // 1. Fetch the metadata list to find the original file name and mime type
     let fileMeta: any = null;
     try {
       const getMetaCommand = new GetObjectCommand({

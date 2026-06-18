@@ -1,14 +1,19 @@
 "use client";
 
-import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
+import React, { useState, useRef, DragEvent, ChangeEvent, useImperativeHandle, forwardRef } from "react";
 import { UploadCloud, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import styles from "./Dropzone.module.css";
 
 interface DropzoneProps {
   onUploadComplete: () => void;
+  currentPath?: string;
 }
 
-export default function Dropzone({ onUploadComplete }: DropzoneProps) {
+export interface DropzoneRef {
+  openFileDialog: () => void;
+}
+
+const Dropzone = forwardRef<DropzoneRef, DropzoneProps>(({ onUploadComplete, currentPath = "/" }, ref) => {
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploadState, setUploadState] = useState<{
     status: "idle" | "uploading" | "success" | "error";
@@ -26,6 +31,15 @@ export default function Dropzone({ onUploadComplete }: DropzoneProps) {
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Expose file selection click to parent
+  useImperativeHandle(ref, () => ({
+    openFileDialog() {
+      if (uploadState.status !== "uploading") {
+        fileInputRef.current?.click();
+      }
+    }
+  }));
 
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -129,6 +143,7 @@ export default function Dropzone({ onUploadComplete }: DropzoneProps) {
     return new Promise((resolve, reject) => {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("path", currentPath); // Attach current directory path!
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/api/upload", true);
@@ -165,6 +180,12 @@ export default function Dropzone({ onUploadComplete }: DropzoneProps) {
     });
   };
 
+  const getFolderNameDisplay = (pathStr: string) => {
+    if (pathStr === "/") return "Mi unidad";
+    const segments = pathStr.split("/").filter(Boolean);
+    return segments[segments.length - 1] || "Mi unidad";
+  };
+
   return (
     <div className={styles.container}>
       <div
@@ -193,7 +214,9 @@ export default function Dropzone({ onUploadComplete }: DropzoneProps) {
             </div>
             <h3>Arrastra y suelta tus archivos aquí</h3>
             <p className={styles.subtext}>o haz clic para explorar en tu equipo</p>
-            <span className={styles.hint}>Soporta documentos, imágenes y videos</span>
+            <span className={styles.hint}>
+              Se subirán a: <strong>{getFolderNameDisplay(currentPath)}</strong>
+            </span>
           </div>
         )}
 
@@ -241,4 +264,8 @@ export default function Dropzone({ onUploadComplete }: DropzoneProps) {
       </div>
     </div>
   );
-}
+});
+
+Dropzone.displayName = "Dropzone";
+
+export default Dropzone;

@@ -5,39 +5,37 @@
 
 .dropzone {
   width: 100%;
-  min-height: 220px;
-  border: 2px dashed rgba(255, 255, 255, 0.15);
+  min-height: 200px;
+  border: 2px dashed var(--card-border);
   border-radius: 16px;
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem;
+  padding: 2rem;
   cursor: pointer;
   position: relative;
   transition: border-color var(--transition-normal), background-color var(--transition-normal), transform var(--transition-fast);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .dropzone:hover {
-  border-color: rgba(99, 102, 241, 0.5);
+  border-color: var(--primary);
   background: var(--card-hover-bg);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .dropzone.active {
   animation: pulseGlow 1.8s infinite;
   transform: scale(0.995);
-  background: rgba(79, 70, 229, 0.1);
+  background: rgba(11, 87, 208, 0.05);
 }
 
 .dropzone.uploading {
   cursor: default;
   pointer-events: none;
-  border-color: rgba(99, 102, 241, 0.3);
+  border-color: var(--card-border);
 }
 
 .fileInput {
@@ -53,79 +51,80 @@
 }
 
 .iconWrapper {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: rgba(79, 70, 229, 0.15);
+  background: rgba(11, 87, 208, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.25rem;
-  color: var(--primary-hover);
+  margin-bottom: 1rem;
+  color: var(--primary);
   transition: transform var(--transition-normal);
 }
 
 .dropzone:hover .iconWrapper {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .icon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 }
 
 .dropzone h3 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .subtext {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .hint {
   font-size: 0.8rem;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
+  background: #f1f3f4;
   padding: 0.35rem 0.8rem;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
 }
 
 /* Uploading styles */
 .loaderWrapper {
-  margin-bottom: 1.25rem;
-  color: var(--primary-hover);
+  margin-bottom: 1rem;
+  color: var(--primary);
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   animation: spin 1s linear infinite;
 }
 
 .filename {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-family: monospace;
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  background: #f1f3f4;
   padding: 0.3rem 0.75rem;
   border-radius: 6px;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
   max-width: 320px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: 1px solid var(--card-border);
 }
 
 .progressContainer {
   width: 260px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #e8eaed;
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -133,11 +132,9 @@
 
 .progressBar {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  background: var(--primary);
   border-radius: 10px;
   transition: width 0.1s ease;
-  background-size: 200% 200%;
-  animation: progressAnim 2s ease infinite;
 }
 
 .progressText {
@@ -148,20 +145,20 @@
 
 /* Success & Error icons overrides */
 .successIcon {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(19, 115, 51, 0.1);
   color: var(--success);
 }
 
 .errorIcon {
-  background: rgba(244, 63, 94, 0.15);
+  background: rgba(197, 34, 31, 0.1);
   color: var(--error);
 }
 
 .errorMessage {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--error);
-  background: rgba(244, 63, 94, 0.05);
-  border: 1px solid rgba(244, 63, 94, 0.15);
+  background: rgba(197, 34, 31, 0.05);
+  border: 1px solid rgba(197, 34, 31, 0.15);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   margin-bottom: 1rem;

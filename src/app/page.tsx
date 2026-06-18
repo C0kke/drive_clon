@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Cloud, RefreshCw, AlertCircle } from "lucide-react";
-import Dropzone from "@/components/Dropzone";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Cloud, RefreshCw, AlertCircle, Menu, Plus, FolderPlus, FileUp, Home as HomeIcon, HardDrive, Search, X } from "lucide-react";
+import Dropzone, { DropzoneRef } from "@/components/Dropzone";
 import RecentFiles from "@/components/RecentFiles";
 import FileList from "@/components/FileList";
 import styles from "./page.module.css";
@@ -13,12 +13,29 @@ interface S3File {
   mimeType: string;
   size: number;
   uploadDate: string;
+  isFolder?: boolean;
+  path?: string;
 }
 
-export default function Home() {
+export default function HomePage() {
   const [files, setFiles] = useState<S3File[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Layout and navigation states
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<"inicio" | "files">("files");
+  const [currentPath, setCurrentPath] = useState("/");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Modal & Dropdown states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [isUploadingFolder, setIsUploadingFolder] = useState(false);
+
+  const dropzoneRef = useRef<DropzoneRef>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -42,51 +59,254 @@ export default function Home() {
     fetchFiles();
   }, [fetchFiles]);
 
-  return (
-    <main className={styles.main}>
-      {/* Visual background glow blobs for premium glassmorphism aesthetic */}
-      <div className="bg-glow-1"></div>
-      <div className="bg-glow-2"></div>
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-      <div className={styles.container}>
-        <header className={styles.header}>
+  const handleCreateFolder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+    setIsUploadingFolder(true);
+    try {
+      const formData = new FormData();
+      formData.append("isFolder", "true");
+      formData.append("name", newFolderName.trim());
+      formData.append("path", currentPath);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const resData = await response.json();
+        throw new Error(resData.error || "Error al crear la carpeta");
+      }
+
+      setNewFolderName("");
+      setIsCreateFolderModalOpen(false);
+      await fetchFiles();
+    } catch (err: any) {
+      alert(err.message || "Error al crear la carpeta");
+    } finally {
+      setIsUploadingFolder(false);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const triggerFileUpload = () => {
+    setIsDropdownOpen(false);
+    // Ensure we switch to tab with dropzone or trigger directly
+    dropzoneRef.current?.openFileDialog();
+  };
+
+  const openFolderModal = () => {
+    setIsDropdownOpen(false);
+    setIsCreateFolderModalOpen(true);
+  };
+
+  return (
+    <div className={styles.appContainer}>
+      {/* 1. Header Navigation Bar */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <button className={styles.menuBtn} onClick={toggleSidebar} title="Menú lateral">
+            <Menu className={styles.menuIcon} />
+          </button>
           <div className={styles.logoWrapper}>
             <Cloud className={styles.logo} />
             <h1 className={styles.title}>Drive Clon</h1>
           </div>
-          <p className={styles.subtitle}>
-            Almacenamiento simple, rápido y local respaldado por S3
-          </p>
-        </header>
+        </div>
 
-        <section className={styles.uploadSection}>
-          <Dropzone onUploadComplete={fetchFiles} />
-        </section>
-
-        {loading && files.length === 0 ? (
-          <div className={styles.statusContainer}>
-            <RefreshCw className={`${styles.statusIcon} ${styles.spin}`} />
-            <p>Cargando tus archivos desde S3...</p>
+        <div className={styles.headerCenter}>
+          <div className={styles.searchBar}>
+            <Search className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Buscar en Drive Clon..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                // If user is on Inicio, switch to files view to see searched contents
+                if (e.target.value.trim() !== "" && activeTab !== "files") {
+                  setActiveTab("files");
+                }
+              }}
+              className={styles.searchInput}
+            />
+            {searchQuery && (
+              <button className={styles.clearSearchBtn} onClick={() => setSearchQuery("")}>
+                <X className={styles.clearSearchIcon} />
+              </button>
+            )}
           </div>
-        ) : error ? (
-          <div className={`${styles.statusContainer} ${styles.errorContainer}`}>
-            <AlertCircle className={styles.statusIcon} />
-            <p>{error}</p>
-            <button onClick={fetchFiles} className={styles.retryBtn}>
-              Reintentar
+        </div>
+
+        <div className={styles.headerRight}>
+          {/* Decorative avatar */}
+          <div className={styles.avatar}>DC</div>
+        </div>
+      </header>
+
+      {/* Main Layout Area */}
+      <div className={styles.mainLayout}>
+        {/* 2. Left Collapsible Sidebar */}
+        <aside className={`${styles.sidebar} ${isSidebarOpen ? "" : styles.sidebarCollapsed}`}>
+          {/* "Nuevo" Button with Dropdown Options */}
+          <div className={styles.newButtonWrapper} ref={dropdownRef}>
+            <button className={styles.newButton} onClick={() => setIsDropdownOpen((prev) => !prev)}>
+              <Plus className={styles.newButtonIcon} />
+              <span>Nuevo</span>
             </button>
+            {isDropdownOpen && (
+              <div className={styles.dropdownMenu}>
+                <button className={styles.dropdownItem} onClick={openFolderModal}>
+                  <FolderPlus className={styles.dropdownItemIcon} />
+                  <span>Nueva carpeta</span>
+                </button>
+                <button className={styles.dropdownItem} onClick={triggerFileUpload}>
+                  <FileUp className={styles.dropdownItemIcon} />
+                  <span>Subir archivo</span>
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className={styles.dashboardLayout}>
-            <RecentFiles files={files} />
-            <FileList files={files} />
+
+          {/* Navigation Links */}
+          <nav className={styles.sidebarNav}>
+            <button
+              className={`${styles.navItem} ${activeTab === "inicio" ? styles.navItemActive : ""}`}
+              onClick={() => {
+                setActiveTab("inicio");
+                setSearchQuery(""); // Clear search when switching tabs
+              }}
+            >
+              <HomeIcon className={styles.navItemIcon} />
+              <span>Inicio</span>
+            </button>
+            <button
+              className={`${styles.navItem} ${activeTab === "files" ? styles.navItemActive : ""}`}
+              onClick={() => setActiveTab("files")}
+            >
+              <HardDrive className={styles.navItemIcon} />
+              <span>Todos los archivos</span>
+            </button>
+          </nav>
+        </aside>
+
+        {/* 3. Main Content Wrapper */}
+        <main className={styles.contentArea}>
+          <div className={styles.contentCard}>
+            {loading && files.length === 0 ? (
+              <div className={styles.statusContainer}>
+                <RefreshCw className={`${styles.statusIcon} ${styles.spin}`} />
+                <p>Conectando con S3...</p>
+              </div>
+            ) : error ? (
+              <div className={`${styles.statusContainer} ${styles.errorContainer}`}>
+                <AlertCircle className={styles.statusIcon} />
+                <p>{error}</p>
+                <button onClick={fetchFiles} className={styles.retryBtn}>
+                  Reintentar
+                </button>
+              </div>
+            ) : (
+              <div className={styles.tabContent}>
+                {activeTab === "inicio" ? (
+                  // "Inicio" Tab View
+                  <div className={styles.tabView}>
+                    <RecentFiles files={files} />
+                    <div className={styles.uploadCardContainer}>
+                      <h3 className={styles.uploadCardTitle}>Subir archivos</h3>
+                      <Dropzone
+                        ref={dropzoneRef}
+                        onUploadComplete={fetchFiles}
+                        currentPath={currentPath}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // "Todos los archivos" Tab View
+                  <div className={styles.tabView}>
+                    <FileList
+                      files={files}
+                      currentPath={currentPath}
+                      onPathChange={setCurrentPath}
+                      searchQuery={searchQuery}
+                      onSearchQueryChange={setSearchQuery}
+                    />
+                    {/* Render dropzone at the bottom for folder uploads */}
+                    <div className={styles.folderUploadContainer}>
+                      <Dropzone
+                        ref={dropzoneRef}
+                        onUploadComplete={fetchFiles}
+                        currentPath={currentPath}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </main>
       </div>
 
-      <footer className={styles.footer}>
-        <p>&copy; {new Date().getFullYear()} Drive Clon - Desarrollado con Next.js y LocalStack S3</p>
-      </footer>
-    </main>
+      {/* 4. Overlay Modal: New Folder Creation */}
+      {isCreateFolderModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Nueva carpeta</h3>
+              <button
+                className={styles.closeModalBtn}
+                onClick={() => setIsCreateFolderModalOpen(false)}
+                disabled={isUploadingFolder}
+              >
+                <X className={styles.closeModalIcon} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateFolder} className={styles.modalForm}>
+              <input
+                type="text"
+                placeholder="Carpeta sin título"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                className={styles.modalInput}
+                autoFocus
+                disabled={isUploadingFolder}
+              />
+              <div className={styles.modalActions}>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateFolderModalOpen(false)}
+                  className={styles.modalBtnCancel}
+                  disabled={isUploadingFolder}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className={styles.modalBtnConfirm}
+                  disabled={isUploadingFolder || !newFolderName.trim()}
+                >
+                  {isUploadingFolder ? "Creando..." : "Crear"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
